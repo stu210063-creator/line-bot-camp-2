@@ -1,0 +1,200 @@
+import streamlit as st
+import pandas as pd
+import datetime
+
+# 設定網頁標題與版面
+st.set_page_config(
+    page_title="2026 高中生理科寒假營隊搜尋引擎",
+    page_icon="🔍",
+    layout="wide"
+)
+
+# --- 1. 建立營隊資料庫 ---
+@st.cache_data
+def load_data():
+    data = [
+        {
+            "營隊名稱": "臺北醫學大學 2026 全國青少年寒假醫學研習營",
+            "主辦單位": "臺北醫學大學",
+            "地點": "台北市",
+            "地區": "北部",
+            "領域": "醫藥衛生",
+            "預估月份": "1月底-2月初",
+            "關鍵字": "北醫 醫學營 寒假 2026",
+            "推薦指數": "⭐⭐⭐⭐⭐"
+        },
+        {
+            "營隊名稱": "中國醫藥大學 2026 寒假高中醫學營隊系列",
+            "主辦單位": "中國醫藥大學",
+            "地點": "台中市",
+            "地區": "中部",
+            "領域": "醫藥衛生",
+            "預估月份": "1月底-2月初",
+            "關鍵字": "中國醫 寒假營隊 2026",
+            "推薦指數": "⭐⭐⭐⭐⭐"
+        },
+        {
+            "營隊名稱": "2026 成功大學 化學營",
+            "主辦單位": "成功大學 化學系",
+            "地點": "台南市",
+            "地區": "南部",
+            "領域": "理工科學",
+            "預估月份": "1月下旬",
+            "關鍵字": "成大化學營 2026",
+            "推薦指數": "⭐⭐⭐⭐⭐"
+        },
+        {
+            "營隊名稱": "2026 清大醫工營 (醫學工程體驗營)",
+            "主辦單位": "清華大學 醫環系",
+            "地點": "新竹市",
+            "地區": "北部",
+            "領域": "跨領域(醫+工)",
+            "預估月份": "寒假期間",
+            "關鍵字": "清大醫工營 2026",
+            "推薦指數": "⭐⭐⭐⭐"
+        },
+        {
+            "營隊名稱": "2026 成功大學 尬電機營 (Electroneering)",
+            "主辦單位": "成功大學 電機系",
+            "地點": "台南市",
+            "地區": "南部",
+            "領域": "電機資訊",
+            "預估月份": "1月下旬",
+            "關鍵字": "成大電機營 2026",
+            "推薦指數": "⭐⭐⭐⭐"
+        },
+        {
+            "營隊名稱": "台大 AI 醫療專題實作營",
+            "主辦單位": "台灣大學 (相關單位)",
+            "地點": "台北市",
+            "地區": "北部",
+            "領域": "AI人工智慧",
+            "預估月份": "寒假期間",
+            "關鍵字": "台大 AI 醫療營 2026",
+            "推薦指數": "⭐⭐⭐⭐"
+        },
+        {
+            "營隊名稱": "中山醫學大學 2026 寒假營隊(醫學/心理)",
+            "主辦單位": "中山醫學大學",
+            "地點": "台中市",
+            "地區": "中部",
+            "領域": "醫藥衛生",
+            "預估月份": "1月底",
+            "關鍵字": "中山醫學大學 寒假營隊 2026",
+            "推薦指數": "⭐⭐⭐⭐"
+        },
+        {
+            "營隊名稱": "2026 清華大學 數學體驗營",
+            "主辦單位": "清華大學 數學系",
+            "地點": "新竹市",
+            "地區": "北部",
+            "領域": "理工科學",
+            "預估月份": "寒假期間",
+            "關鍵字": "清大數學營 2026",
+            "推薦指數": "⭐⭐⭐"
+        },
+        {
+            "營隊名稱": "中山大學 海洋生物偵測 AI 探索營",
+            "主辦單位": "中山大學",
+            "地點": "高雄市",
+            "地區": "南部",
+            "領域": "AI人工智慧",
+            "預估月份": "寒假期間",
+            "關鍵字": "中山大學 AI 海洋營 2026",
+            "推薦指數": "⭐⭐⭐"
+        },
+        {
+            "營隊名稱": "2026 中央大學 地球科學營",
+            "主辦單位": "中央大學 地科系",
+            "地點": "桃園市",
+            "地區": "北部",
+            "領域": "理工科學",
+            "預估月份": "寒假期間",
+            "關鍵字": "中央大學 地科營 2026",
+            "推薦指數": "⭐⭐⭐"
+        }
+    ]
+    return pd.DataFrame(data)
+
+# --- 2. 應用程式主介面 ---
+def main():
+    st.title("🔬 2026 台灣高中生理科寒假營隊 搜尋助手")
+    st.markdown(
+        """
+        歡迎使用！此工具協助高中生快速篩選**理工、醫學、資訊**相關的寒假營隊。
+        資料來源為網路公開資訊，建議點擊按鈕再次確認最新簡章。
+        """
+    )
+    
+    # 載入資料
+    df = load_data()
+
+    # --- 3. 側邊欄：篩選條件 ---
+    st.sidebar.header("🔍 篩選條件")
+    
+    # 地區篩選
+    all_locations = ["全部"] + list(df["地區"].unique())
+    selected_location = st.sidebar.selectbox("選擇舉辦地區", all_locations)
+    
+    # 領域篩選
+    all_categories = ["全部"] + list(df["領域"].unique())
+    selected_category = st.sidebar.selectbox("選擇學群領域", all_categories)
+    
+    # 關鍵字搜尋
+    search_query = st.sidebar.text_input("輸入關鍵字 (如：成大、醫學)")
+
+    # --- 4. 資料過濾邏輯 ---
+    filtered_df = df.copy()
+
+    if selected_location != "全部":
+        filtered_df = filtered_df[filtered_df["地區"] == selected_location]
+    
+    if selected_category != "全部":
+        filtered_df = filtered_df[filtered_df["領域"] == selected_category]
+
+    if search_query:
+        mask = (
+            filtered_df["營隊名稱"].str.contains(search_query, case=False) | 
+            filtered_df["主辦單位"].str.contains(search_query, case=False) |
+            filtered_df["地點"].str.contains(search_query, case=False)
+        )
+        filtered_df = filtered_df[mask]
+
+    # --- 5. 顯示結果 ---
+    st.subheader(f"📊 搜尋結果：共找到 {len(filtered_df)} 個營隊")
+
+    if len(filtered_df) == 0:
+        st.warning("沒有找到符合條件的營隊，請嘗試放寬篩選條件。")
+    else:
+        for index, row in filtered_df.iterrows():
+            with st.container():
+                st.markdown("---")
+                col1, col2 = st.columns([3, 1])
+                
+                with col1:
+                    st.markdown(f"### 🏫 {row['營隊名稱']}")
+                    st.markdown(f"**主辦單位：** {row['主辦單位']}")
+                    st.markdown(f"**📍 地點：** {row['地點']} ({row['地區']})")
+                    st.markdown(f"**🏷️ 領域：** `{row['領域']}`")
+                    st.markdown(f"**📅 時間：** {row['預估月份']}")
+                
+                with col2:
+                    st.metric("推薦度", row['推薦指數'])
+                    google_search_url = f"https://www.google.com/search?q={row['關鍵字']}"
+                    st.link_button(
+                        "🔍 搜尋簡章", 
+                        google_search_url
+                    )
+
+    st.markdown("---")
+    st.markdown(
+        """
+        <div style='text-align: center; color: gray; font-size: 0.8em;'>
+            Created with Streamlit | Deployed on Zeabur
+        </div>
+        """,
+        unsafe_allow_html=True
+    )
+
+if __name__ == "__main__":
+    main()
